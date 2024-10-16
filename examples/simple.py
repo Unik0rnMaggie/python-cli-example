@@ -2,29 +2,31 @@ import subprocess
 import shlex
 import json
 
-
-# create a function that runs suprocess and returns the output
 def run_command(command):
+    """
+    Runs a shell command and returns the output.
+
+    Args:
+        command (str): The command to run.
+
+    Returns:
+        str: The output of the command.
+    """
     cmd = shlex.split(command)
     output = subprocess.check_output(cmd)
     return output
 
 def run_lsblk(device):
     """
-    Runs lsblk command and produces JSON output:
+    Runs lsblk command and produces JSON output.
 
-    lsblk -J -o NAME,SIZE,TYPE,MOUNTPOINT
-    {
-    "blockdevices": [
-        {"name": "vda", "size": "59.6G", "type": "disk", "mountpoint": null,
-            "children": [
-                {"name": "vda1", "size": "59.6G", "type": "part", "mountpoint": "/etc/hosts"}
-            ]
-        }
-    ]
-    }
+    Args:
+        device (str): The device name.
+
+    Returns:
+        dict: The device information.
     """
-    command = f'lsblk -J -o NAME,SIZE,TYPE,MOUNTPOINT'
+    command = 'lsblk -J -o NAME,SIZE,TYPE,MOUNTPOINT'
     output = run_command(command)
     devices = json.loads(output)['blockdevices']
     for parent in devices:
@@ -33,10 +35,16 @@ def run_lsblk(device):
         for child in parent.get('children', []):
             if child['name'] == device:
                 return child
-
+    return None
 
 def main(device):
-    print(f"         '{run_lsblk(device)}'")
+    """
+    Main function to run the lsblk command.
+
+    Args:
+        device (str): The device name.
+    """
+    print(f"'{run_lsblk(device)}'")
 
 if __name__ == '__main__':
     import sys
